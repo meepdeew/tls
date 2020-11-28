@@ -9,135 +9,250 @@
 (define (sexp? x)
   (or (atom? x) (list? x)))
 
-;; The Law of Car: The primitive car is defined only for non-empty lists.
-;; The Law of Cdr: The primitive cdr is defined only for non-empty lists. The cdr of any non-empty list is always another list.
-
 ; p.3
+
 (check-expect (atom? 'atom)
               #true)
+
 (check-expect (atom? 'turkey)
               #true)
+
 (check-expect (atom? 1492)
               #true)
+
 (check-expect (atom? 'u)
               #true)
+
 (check-expect (atom? '*abc$)
               #true)
-(check-expect (atom? '(atom))
-              #false)
-(check-expect (atom? '(atom turkey or))
-              #false)
+
+(check-expect (list? '(atom))
+              #true)
+
+(check-expect (list? '(atom turkey or))
+              #true)
 
 ; p.4
+
 (check-error (list? '(atom turkey) 'or)
              "list?: expects only 1 argument, but found 2")
+
 (check-expect (list? '((atom turkey) 'or))
               #true)
+
 (check-expect (sexp? 'xyz)
               #true)
+
 (check-expect (sexp? '(x y z))
               #true)
+
 (check-expect (sexp? '((x y) z))
               #true)
+
 (check-expect (list? '(how are you doing so far))
               #true)
+
 (check-expect (length '(how are you doing so far))
               6)
+
 (check-expect (list? '(((how) are) ((you) (doing so)) far))
               #true)
+
 (check-expect (length '(((how) are) ((you) (doing so)) far))
               3)
 
 ; p.5
+
 (check-expect (list? '())
               #true)
+
 (check-expect (atom? '()) #false) ; no, because () is just a list.
+
 (check-expect (list? '(() () () ()))
               #true)
-(check-expect (car '(a b c))
-              'a)
-(check-expect (car '((a b c) x y z))
-              '(a b c))
-(check-error (car 'hotdog)
-             "car: expects a pair, given 'hotdog")
-(check-error (car '())
-             "car: expects a pair, given '()")
+
+(check-expect
+ (let ([l '(a b c)])
+   (car l)) 
+ 'a)
+
+(check-expect
+ (let ([l '((a b c) x y z)])
+   (car l)) 
+ '(a b c))
+
+(check-error
+ (let ([l 'hotdog])
+   (car l)) 
+ "car: expects a pair, given 'hotdog")
+
+(check-error
+ (let ([l '()])
+   (car l))
+ "car: expects a pair, given '()")
+
+;; The Law of Car: The primitive car is defined only for non-empty lists.
 
 ; p.6
-(check-expect (car '(((hotdogs)) (and) (pickle) relish))
-              '((hotdogs)))
-(check-expect (car (car '(((hotdogs)) (and))))
-              '(hotdogs))
-(check-expect (cdr '(a b c))
-              '(b c))
-(check-expect (cdr '((a b c) x y z))
-              '(x y z))
-(check-expect (cdr '(hamburger))
-              '())
-(check-expect (cdr '((x) t r))
-              '(t r))
-(check-error (cdr 'hotdogs)
-             "cdr: expects a pair, given 'hotdogs")
+
+(check-expect
+ (let ([l '(((hotdogs)) (and) (pickle) relish)])
+   (car l)) 
+ '((hotdogs)))
+
+(check-expect
+ (let ([l '(((hotdogs)) (and))])
+   (car (car l)))
+ '(hotdogs))
+
+(check-expect
+ (let ([l '(a b c)])
+   (cdr l)) 
+ '(b c))
+
+(check-expect
+ (let ([l '((a b c) x y z)])
+   (cdr l))
+ '(x y z))
+
+(check-expect
+ (let ([l '(hamburger)])
+   (cdr l))
+ '())
+
+(check-expect
+ (let ([l '((x) t r)])
+   (cdr l))
+ '(t r))
+
+(check-error
+ (let ([a 'hotdogs])
+   (cdr a)) 
+ "cdr: expects a pair, given 'hotdogs")
 
 ; p.7
-(check-error (cdr '())
-             "cdr: expects a pair, given '()")
-(check-expect (car (cdr '((b) (x y) ((c)))))
-              '(x y))
-(check-expect (cdr (cdr '((b) (x y) ((c)))))
-              '(((c))))
-(check-error (cdr (car '(a (b (c)) d)))
-              "cdr: expects a pair, given 'a")
+
+(check-error
+ (let ([l '()])
+   (cdr l)) 
+ "cdr: expects a pair, given '()")
+
+;; The Law of Cdr: The primitive cdr is defined only for non-empty lists. The cdr of any non-empty list is always another list.
+
+(check-expect
+ (let ([l '((b) (x y) ((c)))])
+   (car (cdr l)))
+ '(x y))
+
+(check-expect
+ (let ([l '((b) (x y) ((c)))])
+   (cdr (cdr l))) 
+ '(((c))))
+
+(check-error
+ (let ([l '(a (b (c)) d)])
+   (cdr (car l)))
+ "cdr: expects a pair, given 'a")
+
 ;; What does car take as an argument?
 ;; -> a cons cell (a pair)
+
 ;; What does cdr take as an argument?
 ;; -> a cons cell (a pair)
-(check-expect (cons 'peanut '(butter and jelly))
-              '(peanut butter and jelly))
+
+(check-expect
+ (let ([a 'peanut]
+       [l '(butter and jelly)])
+   (cons a l)) 
+ '(peanut butter and jelly))
 
 ; p.8
-(check-expect (cons '(banana and) '(peanut butter and jelly))
-              '((banana and) peanut butter and jelly))
 
-(check-expect (cons '((help) this)
-                    '(is very ((hard) to learn)))
-              '(((help) this) is very ((hard) to learn)))
+(check-expect
+ (let ([s '(banana and)]
+       [l '(peanut butter and jelly)])
+   (cons s l)) 
+ '((banana and) peanut butter and jelly))
+
+(check-expect
+ (let ([s '((help) this)]
+       [l '(is very ((hard) to learn))])
+   (cons s l))
+ '(((help) this) is very ((hard) to learn)))
+
 ;; What does cons take as its arguments?
-;; -> 1st arg, any s-expression. 2nd arg, any list)
-(check-expect (cons '(a b (c)) '())
-              '((a b (c))))
-(check-expect (cons 'a '())
-              '(a))
-(check-error (cons '((a b c)) 'b)
-              "cons: second argument must be a list, but received (list (list 'a 'b 'c)) and 'b")
-(check-error (cons 'a 'b)
-             "cons: second argument must be a list, but received 'a and 'b")
+;; -> 1st arg, any s-expression. 2nd arg, any list.
+
+(check-expect
+ (let ([s '(a b (c))]
+       [l '()])
+   (cons '()))
+ '((a b (c))))
+
+(check-expect
+ (let ([s 'a]
+       [l '()])
+   (cons s l))
+ '(a))
+
+(check-error
+ (let ([s '((a b c))]
+       [l 'b])
+   (cons s l))
+ "cons: second argument must be a list, but received (list (list 'a 'b 'c)) and 'b")
+
+(check-error
+ (let ([s 'a]
+       [l 'b])
+   (cons s l)) 
+ "cons: second argument must be a list, but received 'a and 'b")
+
+; p.9
 
 ;; The Law of Cons: The primitive cons takes two arguments. The second argument to cons must be a list. The result is a list.
 
-; p.9
-(check-expect (cons 'a (car '((b) c d)))
-              '(a b))
-(check-expect (cons 'a (cdr '((b) c d)))
-              '(a c d))
+(check-expect
+ (let ([s 'a]
+       [l '((b) c d)])
+   (cons s (car l))) 
+ '(a b))
+
+(check-expect
+ (let ([s 'a]
+       [l '((b) c d)])
+   (cons s (cdr l)))
+ '(a c d))
+
 ;; Is it true that the list l is the null list where l is ()?
 ;; True
+
 (check-expect (null? (quote ())) #true)
+
 (check-expect  (null? '(a b c)) #false)
 
 ; p.10
 
+(check-expect
+ (let ([a 'spaghetti])
+   (null? a))
+ #false)
+
 ;; The Law of Null?: The primitive null? is defined only for lists
-(check-expect (null? 'spaghetti)
-              #false)
-(check-expect (atom? 'Harry)
-              #true)
-(check-expect (atom? 'Harry)
-              #true)
-(check-expect (atom? '(Harry had a heap of apples)) #false)
+
+(check-expect
+ (let ([s 'Harry])
+   (atom? s))
+ #true)
+
+(check-expect
+ (let ([s '(Harry had a heap of apples)])
+   (atom? s))
+ #false)
+
 ;; How many arguments does atom? take and what are they?
 ;; -> One arg, any s-expression.
 
+; p.11
 (check-expect
  (let ([l '(Harry had a heap of apples)])
    (atom? (car l)))
@@ -177,7 +292,8 @@
 
 ; p.12
 
-;; The Law of Eq?: The primitive eq? takes two arguments. Each must be a non-numeric atom.
+;; How many arguments does eq? take and what are they?
+;; -> It takes two arguments.  Both of them must be non-numeric atoms.
 
 (check-expect
  (let ([l1 '()]
@@ -190,6 +306,8 @@
        [n2 7])
    (eq? n1 n2)) ; In practice, some numbers may be arguments of eq?.
  #false)
+
+;; The Law of Eq?: The primitive eq? takes two arguments. Each must be a non-numeric atom.
 
 (check-expect
  (let ([l '(Mary had a little lamb chop)]
@@ -204,6 +322,7 @@
  #false)
 
 ; p.13
+
 (check-expect
  (let ([l '(beans beans we need jelly beans)])
    (eq? (car l) (car (cdr l))))

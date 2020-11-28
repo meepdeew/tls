@@ -1,6 +1,6 @@
 * tls: The Little Schemer
 
-Keeping track of progres as I go through the book's exercises.
+Keeping track of progres as I go through the exercises in the book by Daniel P. Friedman and Matthias Felleisen.
 
 ** The Ten Commandments
 
