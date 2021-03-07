@@ -64,6 +64,12 @@
           ((eq? (car lat) a) (cdr lat))
           (else (cons (car lat) (rember a (cdr lat)))))))
 
+(check-expect
+ (let ((a 'bacon)
+       (lat '(bacon lettuce and tomato)))
+   (rember a lat))
+ '(lettuce and tomato))
+
 ; p.35
 (check-expect
  (let ((a 'and)
@@ -75,6 +81,12 @@
 ; p.37
 
 ;; The Second Commandment: Use cons to build lists.
+
+(check-expect
+ (let ((a 'and)
+       (lat '(bacon lettuce and tomato)))
+   (rember a lat))
+ '(bacon lettuce tomato))
 
 ; p.38
 ; p.39
@@ -146,7 +158,6 @@
 
 ;; The Third Commandment. When building a list, describe the first typical element, and then cons it onto the natural recursion.
 
-; p.46
 (define seconds
   (lambda (l)
     (cond ((null? l) '())
@@ -155,6 +166,7 @@
  (seconds '((a b) (c d) (e f)))
  '(b d f))
 
+; p.46
 ; p.47
 
 (define insertR
@@ -164,8 +176,18 @@
           (else (cons (car lat) (insertR new old (cdr lat)))))))
 
 (check-expect
- (insertR 'topping 'fudge '(ice cream with fudge for dessert))
+ (let ((new 'topping)
+       (old 'fudge)
+       (lat '(ice cream with fudge for dessert)))
+   (insertR  new old lat))
  '(ice cream with fudge topping for dessert))
+
+(check-expect
+ (let ((new 'jalapeno)
+       (old 'and)
+       (lat '(tacos tamales and salsa)))
+   (insertR new old lat))
+ '(tacos tamales and jalapeno salsa))
 
 ; p.48
 
@@ -174,12 +196,12 @@
  '(a b c d e f g d h))
 
 ; p.49
+; p.50
 
 (check-expect
  (insertR 'topping 'fudge '(ice cream with fudge for dessert))
  '(ice cream with fudge topping for dessert))
 
-; p.50
 ; p.51
 
 (define insertL
@@ -207,11 +229,15 @@
 (define subst2
   (lambda (new o1 o2 lat)
     (cond ((null? lat) '())
-          ((or (eq? (car lat) o1) (eq? (car lat) o2)) (cons new (cdr lat)))
-          (else (cons new (subst2 new o1 o2 (cdr lat)))))))
+          ((or (eq? (car lat) o1)
+               (eq? (car lat) o2))
+           (cons new (cdr lat)))
+          (else (cons (car lat)
+                      (subst2 new o1 o2 (cdr lat)))))))
 
 (check-expect
- (subst2 'vanilla 'chocolate 'banana '(banana ice cream with chocolate topping))
+ (subst2 'vanilla 'chocolate 'banana
+         '(banana ice cream with chocolate topping))
  '(vanilla ice cream with chocolate topping))
 
 ; p.53
@@ -236,7 +262,7 @@
     (cond ((null? lat) '())
           ((eq? (car lat) old)
            (cons old (cons new (multiinsertR new old (cdr lat)))))
-          (else (cons old (multiinsertR new old (cdr lat)))))))
+          (else (cons (car lat) (multiinsertR new old (cdr lat)))))))
 
 (check-expect (multiinsertR 'd 'b '(a b c))
               '(a b d c))
@@ -248,18 +274,28 @@
 (define multiinsertL
   (lambda (new old lat)
     (cond ((null? lat) '())
-          ((eq? (car lat) old) (cons new (cons old (multiinsertL new old (cdr lat)))))
-          (else (cons old (multiinsertL new old (cdr lat)))))))
+          ((eq? (car lat) old)
+           (cons new (cons old (multiinsertL new old (cdr lat)))))
+          (else (cons (car lat) (multiinsertL new old (cdr lat)))))))
 
-(check-expect (multiinsertR 'd 'b '(a b c))
+(check-expect (multiinsertL 'd 'b '(a b c))
               '(a d b c))
-(check-expect (multiinsertR 'd 'b '(a b c a b c))
+(check-expect (multiinsertL 'd 'b '(a b c a b c))
               '(a d b c a d b c))
 
+;; The Fourth Commandment (preliminary). Always change at least one argument while recurring. It must be changed to be closer to termination. The changing argument must be tested in the termination condition: when using cdr, test termination with `null?`.
 
-(define multisubst (lambda (new old lat)))
+(define multisubst
+  (lambda (new old lat)
+    (cond ((null? lat) '())
+          ((eq? (car lat) old)
+           (cons new (multisubst new old (cdr lat))))
+          (else (cons (car lat) (multisubst new old (cdr lat)))))))
 
-
+(check-expect (multisubst 'd 'b '(a b c))
+              '(a d c))
+(check-expect (multisubst 'd 'b '(a b c a b c))
+              '(a d c a d c))
 
 (test)
 

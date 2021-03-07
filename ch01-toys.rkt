@@ -186,7 +186,7 @@
 (check-expect
  (let ([s '(a b (c))]
        [l '()])
-   (cons '()))
+   (cons s l))
  '((a b (c))))
 
 (check-expect
