@@ -3,25 +3,6 @@
 #reader(lib "htdp-intermediate-reader.ss" "lang")((modname ch01-toys) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require test-engine/racket-tests)
 
-(define (atom? x)
-  (not (list? x)))
-
-(define (sexp? x)
-  (or (atom? x) (list? x)))
-
-(define lat?
-  (lambda (l)
-    (cond
-      ((null? l) #true)
-      ((atom? (car l)) (lat? (cdr l))))))
-
-(define tls-member?
-  (lambda (a lat)
-    (cond
-      ((null? lat) #false)
-      (else (or (eq? (car lat) a)
-                (tls-member? a (cdr lat)))))))
-
 ;; The Law of Car: The primitive car is defined only for non-empty lists.
 ;; The Law of Cdr: The primitive cdr is defined only for non-empty lists. The cdr of any non-empty list is always another list.
 ;; The Law of Cons: The primitive cons takes two arguments. The second argument to cons must be a list. The result is a list.
