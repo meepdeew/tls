@@ -161,7 +161,28 @@
 
 (define eqset?
   (lambda (set1 set2)
-    ...))
+    (and (subset? set1 set2) (subset? set2 set1))))
+
+; p.115
+
+(check-expect
+ (let ((set1 '(stewed tomatoes and macaroni))
+       (set2 '(macaroni and cheese)))
+   (intersect? set1 set2))
+ #true)
+
+(define intersect?
+  (lambda (set1 set2)
+    (cond [(null? set1) #false]
+          [else (or (member? (car set1) set2)
+                    (intersect? (cdr set1) set2))])))
+
+; p.116
+
+(check-expect
+ (let ((set1 '(stewed tomatoes and macaroni))
+       (set2 '(macaroni and cheese))))
+ '(and macaroni))
 
 (test)
 
